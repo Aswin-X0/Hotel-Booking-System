@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LuxeStay | Book Your Paradise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/flickity@2/dist/flickity.min.css">
+    <style>
+        .hotel-card {
+            width: 300px;
+            margin-right: 20px;
+        }
+
+        .carousel-cell {
+            width: 33%;
+            margin-right: 10px;
+        }
+
+        @media screen and (max-width: 768px) {
+            .carousel-cell {
+                width: 80%;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans">
+
+    <header class="flex items-center justify-between px-8 py-4 bg-white shadow-sm sticky top-0 z-50">
+        <div class="text-2xl font-bold text-blue-600">LuxeStay</div>
+        <nav class="space-x-4">
+            <a th:if="${user != null and #strings.equalsIgnoreCase(user.role, 'ADMIN')}" th:href="@{/vibes/Adminpanel}" class="px-5 py-2 text-gray-600 hover:text-blue-600 font-medium">
+                ADMIN PANEL
+            </a>
+
+            <a th:href="@{/vibes/signinform}" class="px-5 py-2 text-gray-600 hover:text-blue-600 font-medium">
+                Login
+            </a>
+
+            <a th:href="@{/vibes/signupform}"
+                class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                Sign Up
+            </a>
+        </nav>
+    </header>
+
+    <section class="relative h-[500px] flex items-center justify-center text-white">
+        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80"
+            alt="Beach Resort" class="absolute inset-0 w-full h-full object-cover brightness-75">
+        <div class="relative text-center px-4">
+            <h1 class="text-5xl md:text-6xl font-extrabold mb-4">Find Your Next Escape</h1>
+            <p class="text-lg md:text-xl mb-8">Discover exclusive deals on beachfront hotels and luxury villas.</p>
+            <form th:action="@{/search/results}" method="get"
+                class="bg-white p-2 rounded-xl shadow-lg flex flex-col md:flex-row gap-2 max-w-3xl mx-auto">
+
+                <input type="text" name="location" placeholder="Where are you going?" th:value="${location}"
+                    class="flex-1 p-3 text-gray-800 outline-none border-b md:border-b-0 md:border-r border-gray-200"
+                    required>
+
+                <input type="date" name="checkIn" th:attr="min=${today}" th:value="${checkIn}"
+                    class="p-3 text-gray-800 outline-none border-b md:border-b-0 md:border-r border-gray-200" required>
+
+                <input type="date" name="checkOut" th:attr="min=${today}" th:value="${checkOut}"
+                    class="p-3 text-gray-800 outline-none border-b md:border-b-0 md:border-r border-gray-200" required>
+
+                <button type="submit" class="bg-blue-600 px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition">
+                    Search
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto py-16 px-8">
+        <div class="flex justify-between items-end mb-8">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800">Featured Destinations</h2>
+                <p class="text-gray-500">Hand-picked hotels just for you</p>
+            </div>
+        </div>
+        <div th:if="${error}" class="text-red-600 text-center my-4" th:text="${error}"></div>
+        <div th:if="${message}" class="text-gray-600 text-center my-4" th:text="${message}"></div>
+
+        <div th:if="${featuredHotels != null and !featuredHotels.isEmpty()}" class="main-carousel"
+            data-flickity='{ "cellAlign": "left", "contain": true, "pageDots": false }'>
+
+            <div class="carousel-cell p-2" th:each="res : ${featuredHotels}">
+                <div class="bg-white rounded-2xl overflow-hidden shadow-md border border-gray-100">
+
+                    <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80"
+                        class="h-48 w-full object-cover" alt="Hotel Image">
+
+                    <div class="p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-sm font-semibold text-blue-500 uppercase tracking-wide"
+                                th:text="${res.hotel.location}">
+                                Location
+                            </span>
+
+                            <span class="text-gray-600 text-sm">
+                                Rooms:
+                                <span th:text="${#lists.size(res.availableRooms)}">0</span>
+                            </span>
+                        </div>
+
+                        <h3 class="font-bold text-xl mb-3" th:text="${res.hotel.hotelname}">
+                            Hotel Name
+                        </h3>
+
+                        <div class="space-y-3">
+                            <div class="border rounded-lg p-3" th:each="room : ${res.availableRooms}">
+                                <div class="flex justify-between items-center mb-2">
+                                    <div>
+                                        <div class="text-sm text-gray-500">Room Type</div>
+                                        <div class="font-semibold" th:text="${room.type}">Deluxe</div>
+                                    </div>
+
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-500">Price</div>
+                                        <div class="font-bold text-lg">
+                                            ₹<span th:text="${room.price}">0</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <a class="inline-block mt-2 text-blue-600 font-semibold hover:underline"
+                                    th:href="@{/hotels/{hotelname}/book/{roomId}(hotelname=${res.hotel.hotelname}, roomId=${room.id})}">
+                                    Book this room
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${featuredHotels == null or featuredHotels.isEmpty()}" class="text-center text-gray-500 py-6">
+            No hotels found.
+        </div>
+
+
+
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/flickity@2/dist/flickity.pkgd.min.js"></script>
+</body>
+
+</html>

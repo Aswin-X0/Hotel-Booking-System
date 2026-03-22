@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmed | Vibes</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&family=Questrial&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+--sunset-orange:#fb923c;
+--glass-bg:rgba(255,255,255,0.1);
+--glass-border:rgba(255,255,255,0.2);
+--success-green:#22c55e;
+}
+
+body{
+background: linear-gradient(
+135deg,
+#38bdf8 0%,
+#7dd3fc 30%,
+#bae6fd 60%,
+#fdba74 85%,
+#fb923c 100%
+);
+background-attachment: fixed;
+min-height:100vh;
+font-family:'Inter',sans-serif;
+display:flex;
+flex-direction:column;
+}
+
+/* Navbar */
+
+.navbar-glass{
+background:rgba(15,23,42,0.25);
+backdrop-filter:blur(10px);
+border-bottom:1px solid var(--glass-border);
+padding:1rem 2rem;
+}
+
+.navbar-brand{
+font-family:'Questrial',sans-serif;
+font-size:1.8rem;
+letter-spacing:2px;
+font-weight:bold;
+color:white!important;
+text-transform:lowercase;
+}
+
+.navbar-brand span{
+color:var(--sunset-orange);
+}
+
+/* Center */
+
+.main-content{
+flex:1;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+/* Glass card */
+
+.glass-card{
+background:var(--glass-bg);
+backdrop-filter:blur(15px);
+border:1px solid var(--glass-border);
+border-radius:24px;
+padding:2rem;
+box-shadow:0 20px 40px rgba(0,0,0,0.3);
+color:white;
+}
+
+/* Success header */
+
+.success-header{
+color:var(--success-green);
+font-weight:700;
+}
+
+/* Booking info */
+
+.booking-info{
+background:rgba(255,255,255,0.08);
+border:1px solid var(--glass-border);
+border-radius:16px;
+padding:1rem;
+margin-bottom:1.5rem;
+}
+
+.booking-info p{
+margin-bottom:8px;
+}
+
+/* Button */
+
+.btn-history{
+background:var(--sunset-orange);
+border:none;
+color:white;
+font-weight:600;
+border-radius:12px;
+padding:12px;
+transition:0.3s;
+}
+
+.btn-history:hover{
+background:#f97316;
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(249,115,22,0.3);
+color:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-glass sticky-top">
+<div class="container-fluid">
+<a class="navbar-brand" href="#">vibes<span>.</span></a>
+</div>
+</nav>
+
+<div class="main-content container">
+
+<div class="row justify-content-center w-100">
+
+<div class="col-lg-6 col-md-8">
+
+<div class="glass-card text-center">
+
+<h3 class="success-header mb-4">✅ Booking Confirmed</h3>
+
+<div class="booking-info text-start">
+
+<p><b>Booking ID:</b> <span th:text="${booking.id}"></span></p>
+<p><b>Username:</b> <span th:text="${booking.user.username}"></span></p>
+<p><b>Room ID:</b> <span th:text="${booking.rooms.id}"></span></p>
+<p><b>Hotel:</b> <span th:text="${booking.rooms.hotel.hotelname}"></span></p>
+<p><b>Check-in:</b> <span th:text="${booking.checkIn}"></span></p>
+<p><b>Check-out:</b> <span th:text="${booking.checkOut}"></span></p>
+<p><b>Status:</b> <span th:text="${booking.status}"></span></p>
+
+</div>
+
+<a class="btn btn-history w-100"
+th:href="@{/hotels/bookings(username=${booking.user.username})}">
+Go to Booking History
+</a>
+
+<a class="btn btn-success w-100 mt-3"
+   th:href="@{/Bookings/paymentform/{id}(id=${booking.id})}">
+   Confirm Payment (Book Now)
+</a>
+
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
