@@ -1,10 +1,10 @@
 package com.example.VIBES.Configs;
 
 import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.*;
@@ -25,22 +25,44 @@ public class AuthFilter extends OncePerRequestFilter {
     private  UserService userService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,  HttpServletResponse response,  FilterChain filterChain) throws jakarta.servlet.ServletException, IOException {
-        
-        String authHeader = request.getHeader("Authorization");
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            System.out.println(token);
-            if (jwtUtil.validateToken(token)) {
-                String username = jwtUtil.getUsernameFromToken(token);
-                UserDetails userDetails = userService.loadUserByUsername(username);
-                UsernamePasswordAuthenticationToken auth =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(auth);
+protected void doFilterInternal(HttpServletRequest request,
+                                HttpServletResponse response,
+                                FilterChain filterChain)
+        throws ServletException, IOException {
+
+    String token = null;
+
+    // ✅ READ TOKEN FROM COOKIE
+    if (request.getCookies() != null) {
+        for (Cookie cookie : request.getCookies()) {
+            if ("jwt".equals(cookie.getName())) {
+                token = cookie.getValue();
             }
         }
-
-        filterChain.doFilter(request, response);
     }
+
+    String authHeader = request.getHeader("Authorization");
+    if (token == null && authHeader != null && authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+    }
+
+    if (token != null && jwtUtil.validateToken(token)) {
+
+        String username = jwtUtil.getUsernameFromToken(token);
+
+        UserDetails userDetails = userService.loadUserByUsername(username);
+
+        UsernamePasswordAuthenticationToken auth =
+                new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities()
+                );
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+    }
+
+    filterChain.doFilter(request, response);
+}
 }
 

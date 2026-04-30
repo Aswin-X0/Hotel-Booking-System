@@ -7,10 +7,11 @@ import com.example.VIBES.Model.User;
 import com.example.VIBES.Services.Authservice;
 import com.example.VIBES.Services.UserService;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,18 +59,35 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public String signIn(@RequestParam String username, @RequestParam String password,HttpSession session, Model model) {
-        try {
-            String jwt = authService.SignIn(username, password);
+public String signIn(@RequestParam String username,
+                     @RequestParam String password,
+                     HttpServletResponse response,
+                     HttpSession session,
+                     Model model) {
 
-            User user = userService.getUserbyUsername(username);
-            session.setAttribute("username", user.getUsername());
-            session.setAttribute("user", user);
-            session.setAttribute("jwt", jwt);
-            return "redirect:/vibes/home";
-        } catch (Exception e) {
-            model.addAttribute("error", "Invalid username or password");
-            return "Login";
-        }
+    try {
+        String jwt = authService.SignIn(username, password);
+
+        User user = userService.getUserbyUsername(username);
+
+        // optional (for UI)
+        session.setAttribute("user", user);
+
+        // ✅ STORE JWT IN COOKIE
+        ResponseCookie cookie = ResponseCookie.from("jwt", jwt)
+                .httpOnly(true)
+                .path("/")
+                .maxAge(24 * 60 * 60)
+                .sameSite("Lax")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+
+        return "redirect:/vibes/home";
+
+    } catch (Exception e) {
+        model.addAttribute("error", "Invalid username or password");
+        return "Login";
+    }
 }
 }
