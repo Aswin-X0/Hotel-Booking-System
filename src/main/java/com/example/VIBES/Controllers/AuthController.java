@@ -70,7 +70,6 @@ public String signIn(@RequestParam String username,
 
         User user = userService.getUserbyUsername(username);
 
-        // optional (for UI)
         session.setAttribute("user", user);
 
         // ✅ STORE JWT IN COOKIE
